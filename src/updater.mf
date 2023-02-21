@@ -1,0 +1,2 @@
+UpdaterEndpoint: https://explodingbottle.github.io/eaudl/v1
+Website: https://explodingbottle.github.io
