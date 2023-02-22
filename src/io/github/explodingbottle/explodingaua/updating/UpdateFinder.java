@@ -29,6 +29,7 @@ import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
 import io.github.explodingbottle.explodingau.ExplodingAULib;
+import io.github.explodingbottle.explodingaua.AgentMain;
 
 public class UpdateFinder extends Thread {
 
@@ -51,7 +52,7 @@ public class UpdateFinder extends Thread {
 	}
 
 	public void run() {
-		System.out.println("Initiated local scan.");
+		AgentMain.getLogger().write("UPDF", "Started a local scan.");
 		ArrayList<ProgramInformation> infos = new ArrayList<ProgramInformation>();
 		ArrayList<UpdatePackage> packages = new ArrayList<UpdatePackage>();
 		File auFolder = ExplodingAULib.seekAUFolder();
@@ -72,18 +73,19 @@ public class UpdateFinder extends Thread {
 			ExplodingAULib.storePropsToAUFolder(auFolder, props);
 
 		} else {
-			System.err.println("Scan failed due to an unexisting AU folder.");
+			AgentMain.getLogger().write("UPDF", "Failed the local scan because we couldn't find the AU folder.");
 			lastFailed = true;
 		}
-		System.out.println("Local scan ended. Programs found: " + infos.size());
+		AgentMain.getLogger().write("UPDF", "Local scan ended.");
 		if (lastFailed) {
-			System.err.println("Scan failed, we won't search for updates.");
+			AgentMain.getLogger().write("UPDF", "Local scan failed, we won't continue the scan.");
 			return;
 		}
 		infos.forEach(pinfo -> {
-			System.out.println("\t" + pinfo.toString());
+			AgentMain.getLogger().write("UPDF", "\t" + pinfo.toString());
 		});
-		System.out.println("Initialised scan. Endpoint: " + endpointUrl);
+		AgentMain.getLogger().write("UPDF", "+++++++++++++++++++++++++++++++ Online scan - Using endpoint: "
+				+ endpointUrl + " +++++++++++++++++++++++++++++++");
 		HashMap<String, Manifest> manifestPinfos = new HashMap<String, Manifest>();
 		HashMap<String, Properties> manifestPhashes = new HashMap<String, Properties>();
 		int[] qtToUpd = new int[1];
@@ -92,7 +94,7 @@ public class UpdateFinder extends Thread {
 				Manifest manifPinfo = null;
 				Properties propsHash = null;
 				if (!manifestPhashes.containsKey(pinfo.getpId()) || !manifestPhashes.containsKey(pinfo.getpId())) {
-					System.out.println("Must fetch scan informations for " + pinfo.getpId());
+					AgentMain.getLogger().write("UPDF", "Must fetch scan informations for " + pinfo.getpId());
 					URL hashesUrl = new URL(endpointUrl + "/hashes/" + pinfo.getpId() + ".hsh");
 					URL pinfoUrl = new URL(endpointUrl + "/dl/" + pinfo.getpId() + ".mf");
 					URLConnection conn = hashesUrl.openConnection();
@@ -109,7 +111,7 @@ public class UpdateFinder extends Thread {
 					manifPinfo = manifPinfo2;
 					propsHash = propsHash2;
 				} else {
-					System.out.println("Scan result already found for " + pinfo.getpId());
+					AgentMain.getLogger().write("UPDF", "Scan result already found for " + pinfo.getpId());
 					manifPinfo = manifestPinfos.get(pinfo.getpId());
 					propsHash = manifestPhashes.get(pinfo.getpId());
 				}
@@ -126,14 +128,15 @@ public class UpdateFinder extends Thread {
 					packages.add(uPackage);
 				}
 			} catch (IOException e) {
-				lastFailed = true;
+				AgentMain.getLogger().write("UPDF", "We failed to download informations for " + pinfo.getpId()
+						+ " because of " + e.getLocalizedMessage() + ".");
 				e.printStackTrace();
 			}
 		});
-		System.out.println(
-				"Scan ended. Update packages found: " + packages.size() + ". Updates to download: " + qtToUpd[0]);
+		AgentMain.getLogger().write("UPDF",
+				"+++++++++++++++++++++++++++++++ Online scan - Done +++++++++++++++++++++++++++++++");
 		packages.forEach(pckg -> {
-			System.out.println("\t" + pckg);
+			AgentMain.getLogger().write("UPDF", "\t" + pckg.toString());
 		});
 		this.packages = packages;
 	}

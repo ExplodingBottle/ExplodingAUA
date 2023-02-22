@@ -63,10 +63,11 @@ public class UpdateServer extends Thread {
 
 	public String treatAction(String request) {
 		if (request.equalsIgnoreCase("PING")) {
+			AgentMain.getLogger().write("WSP", "Received a PING query.");
 			return "PONG|" + AgentMain.getVersion();
 		}
 		if (request.equalsIgnoreCase("INTERRUPT")) {
-			System.out.println("Website requested agent shutdown.");
+			AgentMain.getLogger().write("WSP", "Interrupt received from Website.");
 			nextInterrupt = true;
 			return "OK";
 		}
@@ -100,7 +101,7 @@ public class UpdateServer extends Thread {
 				String[] spl = request.split(":");
 				for (int i = 1; i < spl.length; i++) {
 					UpdatePackage fnd = packages.get(Integer.parseInt(spl[i]));
-					if (fnd != null) { // fnd.isRequiresUpdate()
+					if (fnd != null && fnd.isRequiresUpdate()) {
 						toInstall.add(fnd);
 					}
 				}

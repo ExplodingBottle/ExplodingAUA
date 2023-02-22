@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.jar.Manifest;
 
+import io.github.explodingbottle.explodingaua.AgentMain;
+
 public class ConfigurationReader {
 
 	private String fileName;
@@ -38,13 +40,13 @@ public class ConfigurationReader {
 				manifest = new Manifest(input);
 				success = true;
 			} catch (IOException e1) {
-				System.err.println("Failed to load configuration.");
+				AgentMain.getLogger().write("CFG", "Failed to load configuration.");
 				e1.printStackTrace();
 			}
 			try {
 				input.close();
 			} catch (IOException e) {
-				System.err.println("Failed to close configuration stream.");
+				AgentMain.getLogger().write("CFG", "Failed to close configuration.");
 				e.printStackTrace();
 			}
 		}

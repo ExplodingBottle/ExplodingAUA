@@ -31,6 +31,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import io.github.explodingbottle.explodingau.ExplodingAULib;
+import io.github.explodingbottle.explodingaua.AgentMain;
 import io.github.explodingbottle.explodingaua.UpdatingFrame;
 
 public class UpdateThread extends Thread {
@@ -51,7 +52,9 @@ public class UpdateThread extends Thread {
 	private byte[] buff = new byte[4096];
 
 	public void run() {
-		System.out.println("Started installation thread. " + updates.size() + " programs will be updated.");
+		AgentMain.getLogger().write("UPDI",
+				"+++++++++++++++++++++++++++++++ Updates Start +++++++++++++++++++++++++++++++");
+		AgentMain.getLogger().write("UPDI", "Will install a total amount of " + updates.size() + " updates.");
 		frame = new UpdatingFrame();
 		frame.setVisible(true);
 		frame.setAlwaysOnTop(true);
@@ -67,9 +70,12 @@ public class UpdateThread extends Thread {
 			}
 			int m = updates.size();
 			int c = 0;
+			AgentMain.getLogger().write("UPDI", "Downloading updates...");
 			frame.displayMessage("Downloading the updates...\n\r");
 			for (UpdatePackage updPkg : updates) {
 				try {
+					AgentMain.getLogger().write("UPDI", "Downloading " + updPkg.getDisplayName() + " for version "
+							+ updPkg.getLatestVersion() + ".");
 					frame.displayMessage("Downloading " + updPkg.getDisplayName() + " with version "
 							+ updPkg.getLatestVersion() + "...");
 					File dlFile = new File(dls, updPkg.getDisplayName() + "-" + updPkg.getLatestVersion() + ".dl");
@@ -85,37 +91,49 @@ public class UpdateThread extends Thread {
 						}
 						fos.close();
 						is.close();
+						AgentMain.getLogger().write("UPDI", "Download of " + updPkg.getDisplayName() + " with version "
+								+ updPkg.getLatestVersion() + " finished.");
 						frame.displayMessage(" Done.\n\r");
 					} else {
+						AgentMain.getLogger().write("UPDI", "Download of " + updPkg.getDisplayName() + " with version "
+								+ updPkg.getLatestVersion() + " finished because no download was required.");
 						frame.displayMessage(" Download not required.\n\r");
 					}
 				} catch (IOException e) {
+					AgentMain.getLogger().write("UPDI", "Download of " + updPkg.getDisplayName() + " with version "
+							+ updPkg.getLatestVersion() + " finished because the download failed.");
 					frame.displayMessage(" Failed!\n\r");
 				}
 				c++;
 				frame.updateProgressBar(c * 100 / m);
 			}
+			AgentMain.getLogger().write("UPDI", "Finished updates downloading phase.");
 			frame.displayMessage("Updates were downloaded !\n\r");
 			frame.updateProgressBar(0);
 			c = 0;
+			AgentMain.getLogger().write("UPDI", "Starting update installation phase.");
 			frame.displayMessage("Installing updates...\n\r");
 			for (UpdatePackage updPkg : updates) {
+				AgentMain.getLogger().write("UPDI",
+						"Installing " + updPkg.getDisplayName() + " with version " + updPkg.getLatestVersion() + "...");
 				frame.displayMessage(
 						"Installing " + updPkg.getDisplayName() + " with version " + updPkg.getLatestVersion() + "...");
 				File dlFile = new File(dls, updPkg.getDisplayName() + "-" + updPkg.getLatestVersion() + ".dl");
 				File target = new File(updPkg.getLinkedProgram().getpPath());
 				if (!dlFile.exists()) {
 					frame.displayMessage(" Failed.\n\r");
+					AgentMain.getLogger().write("UPDI", "Installation of " + updPkg.getDisplayName() + " with version "
+							+ updPkg.getLatestVersion() + " failed because the download file was missing.");
 					continue;
 				}
 				try {
 					if (updPkg.getMode().equalsIgnoreCase("direct")) {
-						System.out.println("Installation will be done trough 'DIRECT'.");
+						AgentMain.getLogger().write("UPDI", "Installation will be done trough 'DIRECT'.");
 						Files.copy(dlFile.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
 					}
 					if (updPkg.getMode().toLowerCase().startsWith("unzip;")) {
 						String uzPath = updPkg.getMode().split(";")[1];
-						System.out.println("Installation will be done trough 'UNZIP'.");
+						AgentMain.getLogger().write("UPDI", "Installation will be done trough 'UNZIP'.");
 						FileOutputStream fos = new FileOutputStream(target);
 						FileInputStream fis = new FileInputStream(dlFile);
 						ZipInputStream zis = new ZipInputStream(fis);
@@ -135,7 +153,11 @@ public class UpdateThread extends Thread {
 						fos.close();
 					}
 					frame.displayMessage(" Done.\n\r");
+					AgentMain.getLogger().write("UPDI", "Installation of " + updPkg.getDisplayName() + " with version "
+							+ updPkg.getLatestVersion() + " is now finished.");
 				} catch (IOException e) {
+					AgentMain.getLogger().write("UPDI", "Installation of " + updPkg.getDisplayName() + " with version "
+							+ updPkg.getLatestVersion() + " failed with exception: " + e.getLocalizedMessage());
 					frame.displayMessage(" Failed.\n\r");
 				}
 				c++;
@@ -144,7 +166,8 @@ public class UpdateThread extends Thread {
 		}
 		frame.displayMessage("The updates were installed.\n\r");
 		frame.installDone();
-		System.out.println("End of installation thread.");
+		AgentMain.getLogger().write("UPDI",
+				"+++++++++++++++++++++++++++++++ Updates End +++++++++++++++++++++++++++++++");
 		done = true;
 	}
 
