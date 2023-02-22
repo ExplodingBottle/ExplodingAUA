@@ -129,7 +129,7 @@ public class UpdateFinder extends Thread {
 				}
 			} catch (IOException e) {
 				AgentMain.getLogger().write("UPDF", "We failed to download informations for " + pinfo.getpId()
-						+ " because of " + e.getLocalizedMessage() + ".");
+						+ " because of " + e.toString() + ".");
 				e.printStackTrace();
 			}
 		});
