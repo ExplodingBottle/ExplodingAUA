@@ -29,7 +29,7 @@ public class AgentMain {
 	}
 
 	public static String getVersion() {
-		return "1.0.0.2";
+		return "1.0.0.3";
 	}
 
 	public static void main(String[] args) {

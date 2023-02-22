@@ -67,12 +67,12 @@ public class UpdateThread extends Thread {
 			}
 			int m = updates.size();
 			int c = 0;
+			frame.displayMessage("Downloading the updates...\n\r");
 			for (UpdatePackage updPkg : updates) {
 				try {
 					frame.displayMessage("Downloading " + updPkg.getDisplayName() + " with version "
 							+ updPkg.getLatestVersion() + "...");
 					File dlFile = new File(dls, updPkg.getDisplayName() + "-" + updPkg.getLatestVersion() + ".dl");
-					File target = new File(updPkg.getLinkedProgram().getpPath());
 					if (!dlFile.exists()) {
 						URL dl = new URL(updPkg.getDlLocation());
 						URLConnection con = dl.openConnection();
@@ -85,10 +85,30 @@ public class UpdateThread extends Thread {
 						}
 						fos.close();
 						is.close();
+						frame.displayMessage(" Done.\n\r");
+					} else {
+						frame.displayMessage(" Download not required.\n\r");
 					}
-					frame.displayMessage(" Done.\n\r");
-					frame.displayMessage("Installing " + updPkg.getDisplayName() + " with version "
-							+ updPkg.getLatestVersion() + "...");
+				} catch (IOException e) {
+					frame.displayMessage(" Failed!\n\r");
+				}
+				c++;
+				frame.updateProgressBar(c * 100 / m);
+			}
+			frame.displayMessage("Updates were downloaded !\n\r");
+			frame.updateProgressBar(0);
+			c = 0;
+			frame.displayMessage("Installing updates...\n\r");
+			for (UpdatePackage updPkg : updates) {
+				frame.displayMessage(
+						"Installing " + updPkg.getDisplayName() + " with version " + updPkg.getLatestVersion() + "...");
+				File dlFile = new File(dls, updPkg.getDisplayName() + "-" + updPkg.getLatestVersion() + ".dl");
+				File target = new File(updPkg.getLinkedProgram().getpPath());
+				if (!dlFile.exists()) {
+					frame.displayMessage(" Failed.\n\r");
+					continue;
+				}
+				try {
 					if (updPkg.getMode().equalsIgnoreCase("direct")) {
 						System.out.println("Installation will be done trough 'DIRECT'.");
 						Files.copy(dlFile.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
@@ -116,12 +136,13 @@ public class UpdateThread extends Thread {
 					}
 					frame.displayMessage(" Done.\n\r");
 				} catch (IOException e) {
-					frame.displayMessage(" Failed!\n\r");
+					frame.displayMessage(" Failed.\n\r");
 				}
 				c++;
-				frame.updateProgressBar(m * 100 / c);
+				frame.updateProgressBar(c * 100 / m);
 			}
 		}
+		frame.displayMessage("The updates were installed.\n\r");
 		frame.installDone();
 		System.out.println("End of installation thread.");
 		done = true;

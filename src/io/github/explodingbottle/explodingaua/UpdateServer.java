@@ -17,13 +17,7 @@
  */
 package io.github.explodingbottle.explodingaua;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -42,10 +36,16 @@ public class UpdateServer extends Thread {
 	private ArrayList<UpdatePackage> packages;
 	private boolean lastSearchFailed;
 
-	private static final String KEY_STRING = "/explodingaua/browser_gateway.class?data=";
+	private ArrayList<ServerThread> threads;
+
+	static final String KEY_STRING = "/explodingaua/browser_gateway.class?data=";
 
 	public void interrupt() {
 		super.interrupt();
+		nextInterrupt = true;
+		threads.forEach(t -> {
+			t.interrupt();
+		});
 		if (serSock != null) {
 			try {
 				serSock.close();
@@ -55,13 +55,18 @@ public class UpdateServer extends Thread {
 		}
 	}
 
-	private boolean nextInterrupt;
+	boolean nextInterrupt;
+
+	public UpdateServer() {
+		threads = new ArrayList<ServerThread>();
+	}
 
 	public String treatAction(String request) {
 		if (request.equalsIgnoreCase("PING")) {
 			return "PONG|" + AgentMain.getVersion();
 		}
 		if (request.equalsIgnoreCase("INTERRUPT")) {
+			System.out.println("Website requested agent shutdown.");
 			nextInterrupt = true;
 			return "OK";
 		}
@@ -95,7 +100,7 @@ public class UpdateServer extends Thread {
 				String[] spl = request.split(":");
 				for (int i = 1; i < spl.length; i++) {
 					UpdatePackage fnd = packages.get(Integer.parseInt(spl[i]));
-					if (fnd != null && fnd.isRequiresUpdate()) {
+					if (fnd != null) { // fnd.isRequiresUpdate()
 						toInstall.add(fnd);
 					}
 				}
@@ -136,63 +141,9 @@ public class UpdateServer extends Thread {
 			while (!interrupted() && !serSock.isClosed()) {
 				try {
 					Socket accepted = serSock.accept();
-					InputStream is = accepted.getInputStream();
-					OutputStream os = accepted.getOutputStream();
-					BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-					BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os));
-					String line = reader.readLine();
-					String fl = line;
-					if (line != null) {
-						while (line != null && !line.trim().isEmpty()) {
-							line = reader.readLine();
-						}
-						String[] split = fl.split(" ");
-						if (split.length == 3) {
-							if (split[0].equals("GET") && split[1].toLowerCase().startsWith(KEY_STRING)) {
-								String data = split[1].toLowerCase()
-										.split(KEY_STRING.replace("/", "\\/").replace("?", "\\?"))[1];
-								String result = treatAction(data);
-								writer.write("HTTP/1.1 200 OK" + "\r\n");
-								writer.write("Connection: Close" + "\r\n");
-								writer.write("Content-Type: text/html; charset=utf-8" + "\r\n");
-								// writer.write("Access-Control-Allow-Origin: *" + "\r\n");
-								writer.write("Access-Control-Allow-Origin: " + AgentMain.getConfigurationReader()
-										.getConfiguration().getMainAttributes().getValue("Website") + "\r\n");
-								writer.write("Content-Length: " + result.getBytes().length + "\r\n");
-								writer.write("\r\n");
-								writer.write(result);
-							} else {
-								writer.write("HTTP/1.1 500 Internal Server Error" + "\r\n");
-								writer.write("Connection: Close" + "\r\n");
-								writer.write("Content-Type: text/html; charset=utf-8" + "\r\n");
-								// writer.write("Access-Control-Allow-Origin: *" + "\r\n");
-								writer.write("Access-Control-Allow-Origin: " + AgentMain.getConfigurationReader()
-										.getConfiguration().getMainAttributes().getValue("Website") + "\r\n");
-								writer.write("\r\n");
-							}
-						} else {
-							writer.write("HTTP/1.1 500 Internal Server Error" + "\r\n");
-							writer.write("Connection: Close" + "\r\n");
-							writer.write("Content-Type: text/html; charset=utf-8" + "\r\n");
-							// writer.write("Access-Control-Allow-Origin: *" + "\r\n");
-							writer.write("Access-Control-Allow-Origin: " + AgentMain.getConfigurationReader()
-									.getConfiguration().getMainAttributes().getValue("Website") + "\r\n");
-							writer.write("\r\n");
-						}
-					} else {
-						writer.write("HTTP/1.1 500 Internal Server Error" + "\r\n");
-						writer.write("Connection: Close" + "\r\n");
-						writer.write("Content-Type: text/html; charset=utf-8" + "\r\n");
-						writer.write("Access-Control-Allow-Origin: " + AgentMain.getConfigurationReader()
-								.getConfiguration().getMainAttributes().getValue("Website") + "\r\n");
-						writer.write("\r\n");
-					}
-					writer.close();
-					reader.close();
-					accepted.close();
-					if (nextInterrupt) {
-						interrupt();
-					}
+					ServerThread thread = new ServerThread(accepted, this);
+					threads.add(thread);
+					thread.start();
 				} catch (IOException e) {
 				}
 			}

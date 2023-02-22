@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Properties;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
@@ -83,20 +84,36 @@ public class UpdateFinder extends Thread {
 			System.out.println("\t" + pinfo.toString());
 		});
 		System.out.println("Initialised scan. Endpoint: " + endpointUrl);
+		HashMap<String, Manifest> manifestPinfos = new HashMap<String, Manifest>();
+		HashMap<String, Properties> manifestPhashes = new HashMap<String, Properties>();
 		int[] qtToUpd = new int[1];
 		infos.forEach(pinfo -> {
 			try {
-				URL hashesUrl = new URL(endpointUrl + "/hashes/" + pinfo.getpId() + ".hsh");
-				URL pinfoUrl = new URL(endpointUrl + "/dl/" + pinfo.getpId() + ".mf");
-				URLConnection conn = hashesUrl.openConnection();
-				URLConnection conn2 = pinfoUrl.openConnection();
-				InputStream hashesIs = conn.getInputStream();
-				InputStream pinfoIs = conn2.getInputStream();
-				Properties propsHash = new Properties();
-				Manifest manifPinfo = new Manifest(pinfoIs);
-				propsHash.load(hashesIs);
-				pinfoIs.close();
-				hashesIs.close();
+				Manifest manifPinfo = null;
+				Properties propsHash = null;
+				if (!manifestPhashes.containsKey(pinfo.getpId()) || !manifestPhashes.containsKey(pinfo.getpId())) {
+					System.out.println("Must fetch scan informations for " + pinfo.getpId());
+					URL hashesUrl = new URL(endpointUrl + "/hashes/" + pinfo.getpId() + ".hsh");
+					URL pinfoUrl = new URL(endpointUrl + "/dl/" + pinfo.getpId() + ".mf");
+					URLConnection conn = hashesUrl.openConnection();
+					URLConnection conn2 = pinfoUrl.openConnection();
+					InputStream hashesIs = conn.getInputStream();
+					InputStream pinfoIs = conn2.getInputStream();
+					Properties propsHash2 = new Properties();
+					Manifest manifPinfo2 = new Manifest(pinfoIs);
+					propsHash2.load(hashesIs);
+					pinfoIs.close();
+					hashesIs.close();
+					manifestPinfos.put(pinfo.getpId(), manifPinfo2);
+					manifestPhashes.put(pinfo.getpId(), propsHash2);
+					manifPinfo = manifPinfo2;
+					propsHash = propsHash2;
+				} else {
+					System.out.println("Scan result already found for " + pinfo.getpId());
+					manifPinfo = manifestPinfos.get(pinfo.getpId());
+					propsHash = manifestPhashes.get(pinfo.getpId());
+				}
+
 				String matchingVersion = propsHash.getProperty(pinfo.getpHash());
 				if (matchingVersion != null) {
 					Attributes manif = manifPinfo.getMainAttributes();
