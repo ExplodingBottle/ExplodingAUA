@@ -1,5 +1,7 @@
 package io.github.explodingbottle.explodingaua.updating;
 
+import io.github.explodingbottle.explodingaua.AgentMain;
+
 public class UpdatePackage {
 
 	private ProgramInformation linkedProgram;
@@ -8,10 +10,11 @@ public class UpdatePackage {
 	private String latestVersion;
 	private String dlLocation;
 	private String mode;
+	private String description;
 	private boolean requiresUpdate;
 
 	public UpdatePackage(ProgramInformation linkedProgram, String discoveredVerson, String displayName,
-			String latestVersion, String dlLocation, String mode, boolean requiresUpdate) {
+			String latestVersion, String dlLocation, String mode, boolean requiresUpdate, String description) {
 		this.linkedProgram = linkedProgram;
 		this.discoveredVerson = discoveredVerson;
 		this.displayName = displayName;
@@ -19,16 +22,31 @@ public class UpdatePackage {
 		this.dlLocation = dlLocation;
 		this.mode = mode;
 		this.requiresUpdate = requiresUpdate;
+		this.description = description;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 	public String toString() {
 		return "Program=" + linkedProgram.getpPath() + ",Version=" + discoveredVerson + ",DispName=" + displayName
-				+ ",Latest=" + latestVersion + ",IsUpdateRequired=" + requiresUpdate;
+				+ ",Latest=" + latestVersion + ",IsUpdateRequired=" + requiresUpdate + ",IsUpdateRequired="
+				+ description;
 	}
 
 	public String toStringNoArgs() {
-		return linkedProgram.getpPath() + "," + discoveredVerson + "," + displayName + "," + latestVersion + ","
-				+ requiresUpdate;
+		String path = "null";
+		if (Boolean.parseBoolean(
+				AgentMain.getConfigurationReader().getConfiguration().getMainAttributes().getValue("SendFilePaths"))) {
+			path = linkedProgram.getpPath();
+		}
+		return path + "," + discoveredVerson + "," + displayName + "," + latestVersion + ","
+				+ requiresUpdate + "," + description;
 	}
 
 	public boolean isRequiresUpdate() {

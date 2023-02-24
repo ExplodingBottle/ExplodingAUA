@@ -121,7 +121,9 @@ public class UpdateServer extends Thread {
 
 	public void run() {
 		try {
-			serSock = new ServerSocket(7498, 0, InetAddress.getLoopbackAddress());
+			serSock = new ServerSocket(Integer.parseInt(
+					AgentMain.getConfigurationReader().getConfiguration().getMainAttributes().getValue("AgentPort")), 0,
+					InetAddress.getLoopbackAddress());
 			while (!interrupted() && !serSock.isClosed()) {
 				try {
 					Socket accepted = serSock.accept();
