@@ -24,7 +24,7 @@ public class UpdatingFrame extends JFrame implements ActionListener {
 	private JButton finish;
 
 	public UpdatingFrame() {
-		setTitle("ExplodingAU");
+		setTitle("Downloading and Installing updates... - CopperCart Update");
 		setSize(700, 600);
 		setLocationRelativeTo(null);
 		setResizable(false);

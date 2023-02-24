@@ -25,11 +25,15 @@ public class AgentMain {
 	}
 
 	public static void main(String[] args) {
+		if (!System.getProperty("os.name").toLowerCase().contains("windows")) {
+			JOptionPane.showMessageDialog(null, "This agent can only be started under Windows !", "CopperCart Update",
+					JOptionPane.ERROR_MESSAGE);
+			return;
+		}
 		int i = JOptionPane.showConfirmDialog(null,
-				"Are you sure that you want to start the ExplodingAU Agent ? You can shut it down after through the website.",
-				"Agent startup", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+				"Are you sure that you want to start the Coppercart Update Agent ? You can shut it down after through the website.",
+				"CopperCart Update", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 		if (i == 0) {
-
 			File seekedAu = ExplodingAULib.seekAUFolder();
 			if (seekedAu != null) {
 				File logFile = new File(seekedAu, "ExplodingAU.log");
@@ -40,7 +44,7 @@ public class AgentMain {
 			}
 			reader = new ConfigurationReader("updater.mf");
 			if (!reader.loadConfiguration()) {
-				JOptionPane.showMessageDialog(null, "Failed to load the Agent's configuration.", "Fatal error",
+				JOptionPane.showMessageDialog(null, "Failed to load the Agent's configuration.", "CopperCart Update",
 						JOptionPane.ERROR_MESSAGE);
 				return;
 			}
@@ -56,7 +60,7 @@ public class AgentMain {
 			logger.write("MAIN", "Agent is loaded.");
 
 		} else {
-			JOptionPane.showMessageDialog(null, "ExplodingAU Agent won't be started.", "Agent startup",
+			JOptionPane.showMessageDialog(null, "CopperCart Update Agent Agent won't be started.", "CopperCart Update",
 					JOptionPane.INFORMATION_MESSAGE);
 		}
 
