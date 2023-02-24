@@ -1,2 +1,2 @@
-UpdaterEndpoint: https://explodingbottle.github.io/eaudl/v1
-Website: https://explodingbottle.github.io
+UpdaterEndpoint: https://download.overrender.com/content/updates/search_v4
+Website: https://update.overrender.com

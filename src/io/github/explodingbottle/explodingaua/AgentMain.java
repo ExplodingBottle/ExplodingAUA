@@ -1,20 +1,3 @@
-/*
- *   ExplodingAUA - The automatic update agent for ExplodingBottle projects.
- *   Copyright (C) 2023  ExplodingBottle
- *
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
- *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
- *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
 package io.github.explodingbottle.explodingaua;
 
 import java.io.File;
@@ -42,11 +25,15 @@ public class AgentMain {
 	}
 
 	public static void main(String[] args) {
+		if (!System.getProperty("os.name").toLowerCase().contains("windows")) {
+			JOptionPane.showMessageDialog(null, "This agent can only be started under Windows !", "Fatal error",
+					JOptionPane.ERROR_MESSAGE);
+			return;
+		}
 		int i = JOptionPane.showConfirmDialog(null,
 				"Are you sure that you want to start the ExplodingAU Agent ? You can shut it down after through the website.",
 				"Agent startup", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 		if (i == 0) {
-
 			File seekedAu = ExplodingAULib.seekAUFolder();
 			if (seekedAu != null) {
 				File logFile = new File(seekedAu, "ExplodingAU.log");
