@@ -31,7 +31,7 @@ public class AgentMain {
 			return;
 		}
 		int i = JOptionPane.showConfirmDialog(null,
-				"Are you sure that you want to start the ExplodingAU Agent ? You can shut it down after through the website.",
+				"Are you sure that you want to start the Coppercart Agent ? You can shut it down after through the website.",
 				"Agent startup", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 		if (i == 0) {
 			File seekedAu = ExplodingAULib.seekAUFolder();
