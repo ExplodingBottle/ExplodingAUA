@@ -1,2 +1,5 @@
 UpdaterEndpoint: https://update.overrender.com/coppercartupdate/v4/wbsupdate/search_v4
 Website: https://update.overrender.com
+HideUpdatedProducts: false
+SendFilePaths: true
+AgentPort: 7499

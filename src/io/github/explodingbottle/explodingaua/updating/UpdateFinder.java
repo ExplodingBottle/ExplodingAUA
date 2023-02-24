@@ -104,11 +104,20 @@ public class UpdateFinder extends Thread {
 					Attributes manif = manifPinfo.getMainAttributes();
 					UpdatePackage uPackage = new UpdatePackage(pinfo, matchingVersion, manif.getValue("DisplayName"),
 							manif.getValue("Latest"), manif.getValue("DlLoc"), manif.getValue("Mode"),
-							!matchingVersion.equals(manif.getValue("Latest")));
+							!matchingVersion.equals(manif.getValue("Latest")), manif.getValue("Des"));
 					if (uPackage.isRequiresUpdate()) {
 						qtToUpd[0]++;
 					}
-					packages.add(uPackage);
+					if (uPackage.isRequiresUpdate()) {
+						packages.add(uPackage);
+					} else {
+						if (!Boolean.parseBoolean(AgentMain.getConfigurationReader().getConfiguration()
+								.getMainAttributes().getValue("HideUpdatedProducts"))) {
+							packages.add(uPackage);
+						} else {
+							AgentMain.getLogger().write("UPDF", "Found " + pinfo.getpId() + " but won't be shown.");
+						}
+					}
 				}
 			} catch (IOException e) {
 				AgentMain.getLogger().write("UPDF", "We failed to download informations for " + pinfo.getpId()
