@@ -60,7 +60,7 @@ public class AgentMain {
 		int i = 1;
 		if (!launchedAutomatically) {
 			i = JOptionPane.showConfirmDialog(null,
-					"Are you sure that you want to start the Agent ? You can shut it down after through the website.",
+					"Are you sure that you want to start the Agent ?",
 					"Update Agent", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 		} else {
 			i = 0;
