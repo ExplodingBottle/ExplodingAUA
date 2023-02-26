@@ -60,9 +60,9 @@ public class UpdatePackage implements Serializable {
 				AgentMain.getConfigurationReader().getConfiguration().getMainAttributes().getValue("SendFilePaths"))) {
 			path = linkedProgram.getpPath();
 		}
-		return path.replace(",", "&~coma';") + "," + discoveredVerson.replace(",", "&~coma';") + ","
-				+ displayName.replace(",", "&~coma';") + "," + latestVersion.replace(",", "&~coma';") + ","
-				+ requiresUpdate + "," + description.replace(",", "&~coma';");
+		return ("" + path).replace(",", "&~coma';") + "," + ("" + discoveredVerson).replace(",", "&~coma';") + ","
+				+ ("" + displayName).replace(",", "&~coma';") + "," + ("" + latestVersion).replace(",", "&~coma';")
+				+ "," + requiresUpdate + "," + ("" + description).replace(",", "&~coma';");
 	}
 
 	public boolean isRequiresUpdate() {
