@@ -127,6 +127,8 @@ public class UpdateThread extends Thread {
 						String hash = ExplodingAULib.hashFile(dlFile);
 						if (!hash.equals(updPkg.getLatestHash())) {
 							dlFile.delete();
+							results.getResults().put(updPkg,
+									new SimpleEntry<InstallResult, Long>(InstallResult.FAIL, System.currentTimeMillis()));
 							AgentMain.getLogger().write("UPDI",
 									"Download of " + updPkg.getDisplayName() + " with version "
 											+ updPkg.getLatestVersion() + " finished because of a hash mismatch.");
@@ -152,6 +154,8 @@ public class UpdateThread extends Thread {
 									"Download of " + updPkg.getDisplayName() + " with version "
 											+ updPkg.getLatestVersion() + " finished because of a hash mismatch.");
 							frame.displayMessage(" Failed!\n\r");
+							results.getResults().put(updPkg,
+									new SimpleEntry<InstallResult, Long>(InstallResult.FAIL, System.currentTimeMillis()));
 						} else {
 							AgentMain.getLogger().write("UPDI",
 									"Download of " + updPkg.getDisplayName() + " with version "
@@ -199,6 +203,8 @@ public class UpdateThread extends Thread {
 					File target = new File(updPkg.getLinkedProgram().getpPath());
 					if (!dlFile.exists()) {
 						frame.displayMessage(" Failed.\n\r");
+						results.getResults().put(updPkg,
+								new SimpleEntry<InstallResult, Long>(InstallResult.FAIL, System.currentTimeMillis()));
 						AgentMain.getLogger().write("UPDI",
 								"Installation of " + updPkg.getDisplayName() + " with version "
 										+ updPkg.getLatestVersion() + " failed because the download file was missing.");
