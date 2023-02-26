@@ -1,6 +1,10 @@
 package io.github.explodingbottle.explodingaua.updating;
 
-public class ProgramInformation {
+import java.io.Serializable;
+
+public class ProgramInformation implements Serializable {
+
+	private static final long serialVersionUID = -6066883768942373162L;
 
 	private String pHash;
 	private String pPath;

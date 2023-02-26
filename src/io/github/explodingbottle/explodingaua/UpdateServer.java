@@ -1,11 +1,19 @@
 package io.github.explodingbottle.explodingaua;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.URL;
 import java.util.ArrayList;
 
+import io.github.explodingbottle.explodingau.ExplodingAULib;
+import io.github.explodingbottle.explodingaua.updating.InstallResults;
 import io.github.explodingbottle.explodingaua.updating.UpdateFinder;
 import io.github.explodingbottle.explodingaua.updating.UpdatePackage;
 import io.github.explodingbottle.explodingaua.updating.UpdateThread;
@@ -47,6 +55,23 @@ public class UpdateServer extends Thread {
 	public String treatAction(String request) {
 		if (request.equalsIgnoreCase("PING")) {
 			AgentMain.getLogger().write("WSP", "Received a PING query.");
+			AgentMain.getLogger().write("WSP", "Doing a connection test.");
+			boolean cS = false;
+			try {
+				URL tCon = new URL(AgentMain.getConfigurationReader().getConfiguration().getMainAttributes()
+						.getValue("UpdaterEndpoint") + "/con_test/con_test.txt");
+				BufferedReader reader = new BufferedReader(new InputStreamReader(tCon.openStream()));
+				String line = reader.readLine();
+				if (line != null && line.equals("connection_test")) {
+					cS = true;
+				}
+				reader.close();
+			} catch (IOException e) {
+
+			}
+			if (!cS) {
+				return "CON_TEST_FAIL";
+			}
 			return "PONG|" + AgentMain.getVersion();
 		}
 		if (request.equalsIgnoreCase("INTERRUPT")) {
@@ -69,12 +94,35 @@ public class UpdateServer extends Thread {
 			}
 		}
 		if (request.equalsIgnoreCase("INSTALL_RESULTS")) {
-			if (updThread.isDone()) {
+			if (updThread.getResults() != null) {
+				String toRet = updThread.getResults().toString();
 				updThread = null;
-				return "DONE";
+				return toRet;
 			}
 			return "INSTALLING";
 		}
+
+		if (request.equalsIgnoreCase("UPDATES_HISTORY")) {
+			try {
+				File history = new File(ExplodingAULib.seekAUFolder(), "update_history.dat");
+				InstallResults historyRes = null;
+				if (!history.exists()) {
+					historyRes = new InstallResults();
+				} else {
+					FileInputStream input = new FileInputStream(history);
+					ObjectInputStream toRead = new ObjectInputStream(input);
+					historyRes = (InstallResults) toRead.readObject();
+					toRead.close();
+					input.close();
+				}
+				return historyRes.toString();
+			} catch (Exception e) {
+				AgentMain.getLogger().write("WSP", "Failed to load history. " + e.toString());
+			}
+
+			return "HISTORY_FAIL";
+		}
+
 		if (request.toLowerCase().startsWith("sinstall:")) {
 			if (packages == null) {
 				return "NO_PACKAGES";

@@ -102,9 +102,15 @@ public class UpdateFinder extends Thread {
 				String matchingVersion = propsHash.getProperty(pinfo.getpHash());
 				if (matchingVersion != null) {
 					Attributes manif = manifPinfo.getMainAttributes();
+					final StringBuilder lh = new StringBuilder();
+					propsHash.forEach((k, v) -> {
+						if (v.equals(manif.getValue("Latest")) && lh.toString().isEmpty()) {
+							lh.append(k);
+						}
+					});
 					UpdatePackage uPackage = new UpdatePackage(pinfo, matchingVersion, manif.getValue("DisplayName"),
 							manif.getValue("Latest"), manif.getValue("DlLoc"), manif.getValue("Mode"),
-							!matchingVersion.equals(manif.getValue("Latest")), manif.getValue("Des"));
+							!matchingVersion.equals(manif.getValue("Latest")), manif.getValue("Des"), lh.toString());
 					if (uPackage.isRequiresUpdate()) {
 						qtToUpd[0]++;
 					}

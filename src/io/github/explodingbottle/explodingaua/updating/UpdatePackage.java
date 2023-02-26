@@ -1,8 +1,12 @@
 package io.github.explodingbottle.explodingaua.updating;
 
+import java.io.Serializable;
+
 import io.github.explodingbottle.explodingaua.AgentMain;
 
-public class UpdatePackage {
+public class UpdatePackage implements Serializable {
+
+	private static final long serialVersionUID = 4044409814516523219L;
 
 	private ProgramInformation linkedProgram;
 	private String discoveredVerson;
@@ -12,9 +16,11 @@ public class UpdatePackage {
 	private String mode;
 	private String description;
 	private boolean requiresUpdate;
+	private transient String latestHash;
 
 	public UpdatePackage(ProgramInformation linkedProgram, String discoveredVerson, String displayName,
-			String latestVersion, String dlLocation, String mode, boolean requiresUpdate, String description) {
+			String latestVersion, String dlLocation, String mode, boolean requiresUpdate, String description,
+			String latestHash) {
 		this.linkedProgram = linkedProgram;
 		this.discoveredVerson = discoveredVerson;
 		this.displayName = displayName;
@@ -23,6 +29,7 @@ public class UpdatePackage {
 		this.mode = mode;
 		this.requiresUpdate = requiresUpdate;
 		this.description = description;
+		this.latestHash = latestHash;
 	}
 
 	public String getDescription() {
@@ -35,8 +42,16 @@ public class UpdatePackage {
 
 	public String toString() {
 		return "Program=" + linkedProgram.getpPath() + ",Version=" + discoveredVerson + ",DispName=" + displayName
-				+ ",Latest=" + latestVersion + ",IsUpdateRequired=" + requiresUpdate + ",IsUpdateRequired="
-				+ description;
+				+ ",Latest=" + latestVersion + ",IsUpdateRequired=" + requiresUpdate + ",UpdateDescription="
+				+ description + ",LatestHash=" + latestHash;
+	}
+
+	public String getLatestHash() {
+		return latestHash;
+	}
+
+	public void setLatestHash(String latestHash) {
+		this.latestHash = latestHash;
 	}
 
 	public String toStringNoArgs() {
@@ -45,8 +60,9 @@ public class UpdatePackage {
 				AgentMain.getConfigurationReader().getConfiguration().getMainAttributes().getValue("SendFilePaths"))) {
 			path = linkedProgram.getpPath();
 		}
-		return path + "," + discoveredVerson + "," + displayName + "," + latestVersion + ","
-				+ requiresUpdate + "," + description;
+		return path.replace(",", "&~coma';") + "," + discoveredVerson.replace(",", "&~coma';") + ","
+				+ displayName.replace(",", "&~coma';") + "," + latestVersion.replace(",", "&~coma';") + ","
+				+ requiresUpdate + "," + description.replace(",", "&~coma';");
 	}
 
 	public boolean isRequiresUpdate() {

@@ -50,9 +50,10 @@ public class ServerThread extends Thread {
 						writer.write("HTTP/1.1 200 OK" + "\r\n");
 						writer.write("Connection: Close" + "\r\n");
 						writer.write("Content-Type: text/html; charset=utf-8" + "\r\n");
-						// writer.write("Access-Control-Allow-Origin: *" + "\r\n");
-						writer.write("Access-Control-Allow-Origin: " + AgentMain.getConfigurationReader()
-								.getConfiguration().getMainAttributes().getValue("Website") + "\r\n");
+						writer.write("Access-Control-Allow-Origin: *" + "\r\n");
+						// writer.write("Access-Control-Allow-Origin: " +
+						// AgentMain.getConfigurationReader()
+						// .getConfiguration().getMainAttributes().getValue("Website") + "\r\n");
 						writer.write("Content-Length: " + result.getBytes().length + "\r\n");
 						writer.write("\r\n");
 						writer.write(result);
@@ -60,18 +61,20 @@ public class ServerThread extends Thread {
 						writer.write("HTTP/1.1 500 Internal Server Error" + "\r\n");
 						writer.write("Connection: Close" + "\r\n");
 						writer.write("Content-Type: text/html; charset=utf-8" + "\r\n");
-						// writer.write("Access-Control-Allow-Origin: *" + "\r\n");
-						writer.write("Access-Control-Allow-Origin: " + AgentMain.getConfigurationReader()
-								.getConfiguration().getMainAttributes().getValue("Website") + "\r\n");
+						writer.write("Access-Control-Allow-Origin: *" + "\r\n");
+						// writer.write("Access-Control-Allow-Origin: " +
+						// AgentMain.getConfigurationReader()
+						// .getConfiguration().getMainAttributes().getValue("Website") + "\r\n");
 						writer.write("\r\n");
 					}
 				} else {
 					writer.write("HTTP/1.1 500 Internal Server Error" + "\r\n");
 					writer.write("Connection: Close" + "\r\n");
 					writer.write("Content-Type: text/html; charset=utf-8" + "\r\n");
-					// writer.write("Access-Control-Allow-Origin: *" + "\r\n");
-					writer.write("Access-Control-Allow-Origin: " + AgentMain.getConfigurationReader().getConfiguration()
-							.getMainAttributes().getValue("Website") + "\r\n");
+					writer.write("Access-Control-Allow-Origin: *" + "\r\n");
+					// writer.write("Access-Control-Allow-Origin: " +
+					// AgentMain.getConfigurationReader().getConfiguration()
+					// .getMainAttributes().getValue("Website") + "\r\n");
 					writer.write("\r\n");
 				}
 			} else {

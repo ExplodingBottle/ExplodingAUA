@@ -1,0 +1,1 @@
+UpdaterEndpoint: https://update.overrender.com/coppercartupdate/v4/wbsupdate/search_v4
