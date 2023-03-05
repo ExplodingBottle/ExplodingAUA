@@ -78,6 +78,16 @@ public class UpdateThread extends Thread {
 					return;
 				}
 			}
+			File uzpsFold = new File(auFolder, "Unzips");
+			if (!uzpsFold.exists()) {
+				if (!uzpsFold.mkdir()) {
+					updates.forEach((pkg) -> {
+						results.getResults().put(pkg,
+								new SimpleEntry<InstallResult, Long>(InstallResult.FAIL, System.currentTimeMillis()));
+					});
+					return;
+				}
+			}
 			int m = updates.size();
 			int c = 0;
 			AgentMain.getLogger().write("UPDI", "Downloading updates...");
@@ -124,15 +134,49 @@ public class UpdateThread extends Thread {
 						}
 						frame.updatePbStatusText("Verifying the download");
 						frame.updateProgressBar(0);
-						String hash = ExplodingAULib.hashFile(dlFile);
-						if (!hash.equals(updPkg.getLatestHash())) {
-							dlFile.delete();
-							results.getResults().put(updPkg,
-									new SimpleEntry<InstallResult, Long>(InstallResult.FAIL, System.currentTimeMillis()));
-							AgentMain.getLogger().write("UPDI",
-									"Download of " + updPkg.getDisplayName() + " with version "
-											+ updPkg.getLatestVersion() + " finished because of a hash mismatch.");
-							frame.displayMessage(" Failed!\n\r");
+						if (updPkg.getMode().equalsIgnoreCase("direct")) {
+							String hash = ExplodingAULib.hashFile(dlFile);
+							if (!hash.equals(updPkg.getLatestHash())) {
+								dlFile.delete();
+								results.getResults().put(updPkg, new SimpleEntry<InstallResult, Long>(
+										InstallResult.FAIL, System.currentTimeMillis()));
+								AgentMain.getLogger().write("UPDI",
+										"Download of " + updPkg.getDisplayName() + " with version "
+												+ updPkg.getLatestVersion() + " finished because of a hash mismatch.");
+								frame.displayMessage(" Failed!\n\r");
+							}
+						}
+						if (updPkg.getMode().startsWith("unzip;")) {
+							File uzTarget = new File(uzpsFold, digested + ".uzip");
+							String uzPath = updPkg.getMode().split(";")[1];
+							AgentMain.getLogger().write("UPDI", "Unziping for 'UNZIP' hash-check.");
+							FileOutputStream fos2 = new FileOutputStream(uzTarget);
+							FileInputStream fis = new FileInputStream(dlFile);
+							ZipInputStream zis = new ZipInputStream(fis);
+							ZipEntry entry = zis.getNextEntry();
+							while (entry != null) {
+								if (entry.getName().equals(uzPath)) {
+									int read2 = zis.read(buff, 0, buff.length);
+									while (read2 != -1) {
+										fos2.write(buff, 0, read2);
+										read2 = zis.read(buff, 0, buff.length);
+									}
+								}
+								entry = zis.getNextEntry();
+							}
+							zis.close();
+							fis.close();
+							fos2.close();
+							String hash = ExplodingAULib.hashFile(uzTarget);
+							if (!hash.equals(updPkg.getLatestHash())) {
+								dlFile.delete();
+								results.getResults().put(updPkg, new SimpleEntry<InstallResult, Long>(
+										InstallResult.FAIL, System.currentTimeMillis()));
+								AgentMain.getLogger().write("UPDI",
+										"Download of " + updPkg.getDisplayName() + " with version "
+												+ updPkg.getLatestVersion() + " finished because of a hash mismatch.");
+								frame.displayMessage(" Failed!\n\r");
+							}
 						}
 						if (delayBetweenInstalls) {
 							try {
@@ -147,16 +191,53 @@ public class UpdateThread extends Thread {
 					} else {
 						frame.updatePbStatusText("Verifying the download");
 						frame.updateProgressBar(0);
-						String hash = ExplodingAULib.hashFile(dlFile);
-						if (!hash.equals(updPkg.getLatestHash())) {
-							dlFile.delete();
-							AgentMain.getLogger().write("UPDI",
-									"Download of " + updPkg.getDisplayName() + " with version "
-											+ updPkg.getLatestVersion() + " finished because of a hash mismatch.");
-							frame.displayMessage(" Failed!\n\r");
-							results.getResults().put(updPkg,
-									new SimpleEntry<InstallResult, Long>(InstallResult.FAIL, System.currentTimeMillis()));
-						} else {
+
+						if (updPkg.getMode().equalsIgnoreCase("direct")) {
+							String hash = ExplodingAULib.hashFile(dlFile);
+							if (!hash.equals(updPkg.getLatestHash())) {
+								dlFile.delete();
+								results.getResults().put(updPkg, new SimpleEntry<InstallResult, Long>(
+										InstallResult.FAIL, System.currentTimeMillis()));
+								AgentMain.getLogger().write("UPDI",
+										"Download of " + updPkg.getDisplayName() + " with version "
+												+ updPkg.getLatestVersion() + " finished because of a hash mismatch.");
+								frame.displayMessage(" Failed!\n\r");
+							}
+						}
+						if (updPkg.getMode().startsWith("unzip;")) {
+							File uzTarget = new File(uzpsFold, digested + ".uzip");
+							String uzPath = updPkg.getMode().split(";")[1];
+							AgentMain.getLogger().write("UPDI", "Unziping for 'UNZIP' hash-check.");
+							FileOutputStream fos2 = new FileOutputStream(uzTarget);
+							FileInputStream fis = new FileInputStream(dlFile);
+							ZipInputStream zis = new ZipInputStream(fis);
+							ZipEntry entry = zis.getNextEntry();
+							while (entry != null) {
+								if (entry.getName().equals(uzPath)) {
+									int read2 = zis.read(buff, 0, buff.length);
+									while (read2 != -1) {
+										fos2.write(buff, 0, read2);
+										read2 = zis.read(buff, 0, buff.length);
+									}
+								}
+								entry = zis.getNextEntry();
+							}
+							zis.close();
+							fis.close();
+							fos2.close();
+							String hash = ExplodingAULib.hashFile(uzTarget);
+							if (!hash.equals(updPkg.getLatestHash())) {
+								dlFile.delete();
+								results.getResults().put(updPkg, new SimpleEntry<InstallResult, Long>(
+										InstallResult.FAIL, System.currentTimeMillis()));
+								AgentMain.getLogger().write("UPDI",
+										"Download of " + updPkg.getDisplayName() + " with version "
+												+ updPkg.getLatestVersion() + " finished because of a hash mismatch.");
+								frame.displayMessage(" Failed!\n\r");
+							}
+						}
+
+						if (results.getResults().get(updPkg) == null) {
 							AgentMain.getLogger().write("UPDI",
 									"Download of " + updPkg.getDisplayName() + " with version "
 											+ updPkg.getLatestVersion()
@@ -216,25 +297,9 @@ public class UpdateThread extends Thread {
 							Files.copy(dlFile.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
 						}
 						if (updPkg.getMode().toLowerCase().startsWith("unzip;")) {
-							String uzPath = updPkg.getMode().split(";")[1];
+							File uzTarget = new File(uzpsFold, digested + ".uzip");
 							AgentMain.getLogger().write("UPDI", "Installation will be done trough 'UNZIP'.");
-							FileOutputStream fos = new FileOutputStream(target);
-							FileInputStream fis = new FileInputStream(dlFile);
-							ZipInputStream zis = new ZipInputStream(fis);
-							ZipEntry entry = zis.getNextEntry();
-							while (entry != null) {
-								if (entry.getName().equals(uzPath)) {
-									int read = zis.read(buff, 0, buff.length);
-									while (read != -1) {
-										fos.write(buff, 0, read);
-										read = zis.read(buff, 0, buff.length);
-									}
-								}
-								entry = zis.getNextEntry();
-							}
-							zis.close();
-							fis.close();
-							fos.close();
+							Files.copy(uzTarget.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
 						}
 						String fHash = ExplodingAULib.hashFile(target);
 						if (fHash != null) {
